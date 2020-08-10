@@ -5,21 +5,20 @@ const Post = require("../models/post");
 
 const User = require("../models/user");
 exports.getPosts = (req, res, next) => {
-  const currPage = req.query.page||1;
+  const currPage = req.query.page || 1;
   let totalItems;
   const perPage = 2;
   Post.find()
     .countDocuments()
     .then((count) => {
       totalItems = count;
-      return Post
-        .find()
+      return Post.find()
         .skip((currPage - 1) * perPage)
         .limit(perPage);
     })
     .then((posts) => {
       // console.log(posts);
-      res.status(200).json({ posts: posts,totalItems:totalItems });
+      res.status(200).json({ posts: posts, totalItems: totalItems });
     })
     .catch((err) => {
       if (!err.statusCode) {
@@ -76,7 +75,7 @@ exports.createPost = (req, res, next) => {
       return User.findById(req.userId)
     })
     .then(user => {
-      creator = user;
+      creater = user;
       user.posts.push(newPost);
       return user.save();
     })
@@ -84,7 +83,7 @@ exports.createPost = (req, res, next) => {
       res.status(201).json({
         message: 'Post created successfully!',
         post: newPost,
-        creator: { _id: creator._id, name: creator.name }
+        creator: { _id: creater._id, name: creater.name }
       });
     })
     .catch((err) => {
@@ -121,7 +120,7 @@ exports.updatePost = (req, res, next) => {
         throw err;
       }
       if (post.creator.toString() !== req.userId) {
-        const error = new Error('Not authorized!');
+        const error = new Error("Not authorized!");
         error.statusCode = 403;
         throw error;
       }
@@ -133,7 +132,7 @@ exports.updatePost = (req, res, next) => {
       post.content = updatedContent;
       return post.save();
     })
-    
+
     .then((result) => {
       // console.log("updating post" , result);
       res.status(201).json({
@@ -151,14 +150,14 @@ exports.updatePost = (req, res, next) => {
 exports.deletePost = (req, res, next) => {
   const postId = req.params.postId;
   Post.findById(postId)
-    .then(post => {
+    .then((post) => {
       if (!post) {
-        const error = new Error('Could not find post.');
+        const error = new Error("Could not find post.");
         error.statusCode = 404;
         throw error;
       }
       if (post.creator.toString() !== req.userId) {
-        const error = new Error('Not authorized!');
+        const error = new Error("Not authorized!");
         error.statusCode = 403;
         throw error;
       }
@@ -166,17 +165,17 @@ exports.deletePost = (req, res, next) => {
       clearImage(post.imageUrl);
       return Post.findByIdAndRemove(postId);
     })
-    .then(result => {
+    .then((result) => {
       return User.findById(req.userId);
     })
-    .then(user => {
+    .then((user) => {
       user.posts.pull(postId);
       return user.save();
     })
-    .then(result => {
-      res.status(200).json({ message: 'Deleted post.' });
+    .then((result) => {
+      res.status(200).json({ message: "Deleted post." });
     })
-    .catch(err => {
+    .catch((err) => {
       if (!err.statusCode) {
         err.statusCode = 500;
       }

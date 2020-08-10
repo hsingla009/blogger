@@ -7,6 +7,8 @@ module.exports = (req,res,next) =>{
         throw err;
     }
     const token = req.get('Authorization').split(' ')[1];
+    // console.log(token);
+
     let decodeToken;
     try{
         decodeToken = jwt.verify(token,'hsingla');
